@@ -1,1 +1,4 @@
-node_modules
+node_modules 
+src/assets/videos/v1.mp4
+src/assets/videos/v1.m4a
+src/public/fullvideo.mp4
