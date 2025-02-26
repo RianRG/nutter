@@ -29,42 +29,43 @@ const processVideo = async (url: string, time1: string, time2: string) =>{
   const videoPath = path.join(__dirname, 'assets', 'videos')
   const publicPath = path.join(__dirname, 'public')
 
-  fs.mkdirSync(videoPath, { recursive: true })
-  fs.mkdirSync(publicPath, { recursive: true })
+  if(!fs.existsSync(videoPath)) fs.mkdirSync(videoPath, { recursive: true })
+  if(!fs.existsSync(publicPath)) fs.mkdirSync(publicPath, { recursive: true })
 
   await new Promise<void>((resolve, reject) =>{
-    console.log('Starting to download video...')
+    console.log(' Starting to download video...')
     ytdl(url, {
       filter: 'videoonly',
       quality: '137'
     }).pipe(fs.createWriteStream(path.join(videoPath, 'v1.mp4')))
     .on('finish', () =>{
-      console.log('Video downloaded succesfully!')
+      console.log(' Video downloaded succesfully!')
       resolve()
     })
-    .on('error', err =>{
+    .on('error', (err: Error) =>{
       console.log(err)
       reject(err)
     })
   })
   await new Promise<void>((resolve, reject) =>{
-    console.log('Downloading audio...')
+    console.log(' Downloading audio...')
     ytdl(url, {
       filter: 'audioonly',
       quality: 'highestaudio'
     }).pipe(fs.createWriteStream(path.join(videoPath, 'v1.m4a')))
     .on('finish', () =>{
-      console.log('Audio downloaded succesfully!')
+      console.log(' Audio downloaded succesfully!')
       resolve()
     })
-    .on('error', err =>{
+    .on('error', (err: Error) =>{
       console.log(err)
       reject(err)
     })
   })
 
   await new Promise<void>((resolve, reject) =>{
-    console.log('Starting to merge videos...')
+    console.log(' Starting to merge videos...')
+    let count=0;
     ffmpeg()
     .input(path.join(videoPath, 'v1.mp4'))
     .input(path.join(videoPath, 'v1.m4a'))
@@ -76,10 +77,16 @@ const processVideo = async (url: string, time1: string, time2: string) =>{
     ])
     .save(path.join(publicPath, 'fullvideo.mp4'))
     .on('progress', () =>{
-      console.log('Merging in progress...')
+      for(let k=-1; k<count; ++k){
+        process.stdout.write('| ')
+      }
+      setTimeout(() =>{
+        count++;
+        process.stdout.write('\r\x1b[K')
+      }, 2000)
     })
     .on('end', () =>{
-      console.log('Video merged succesfully!')
+      console.log('\nVideo merged succesfully!')
       resolve()
     })
     .on('error', (err) =>{
@@ -90,21 +97,37 @@ const processVideo = async (url: string, time1: string, time2: string) =>{
 
   await new Promise<void>((resolve, reject) =>{
     console.log('Starting to cut video...');
-
+    let count=0;
     ffmpeg(path.join(publicPath, 'fullvideo.mp4'))
     .setStartTime(time1)
     .setDuration(duration)
     .output(path.join(publicPath, 'result.mp4'))
+    .on('start', () =>{
+      process.stdout.write('\n Cutting in progress \n')
+    })
+    .on('progress', () =>{
+      for(let k=-1; k<count; ++k){
+        process.stdout.write('| ')
+      }
+      setTimeout(() =>{
+        count++;
+        process.stdout.write('\r\x1b[K')
+      }, 2000)
+    })
     .on('error', (err) =>{
       console.log(err)
       reject(err)
     })
     .on('end', () =>{
-      console.log('Video cut succesfully!')
+      console.log('\nVideo cut succesfully!')
       resolve()
     })
     .run()
   })
+
+  fs.rmSync(videoPath, { recursive: true, force: true })
+  fs.rmdirSync(path.join(videoPath, '..', '..','assets'))
+  fs.unlinkSync(path.join(publicPath, 'fullvideo.mp4'))
 }
 
 
