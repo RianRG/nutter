@@ -1,7 +1,7 @@
 import readline from 'readline';
 import ffmpegPath from '@ffmpeg-installer/ffmpeg'; 
 import ffmpeg from 'fluent-ffmpeg';
-import ytdl from 'ytdl-core'
+import ytdl from '@distube/ytdl-core'
 import path from 'node:path'
 import fs from 'node:fs'
 import { fileURLToPath } from 'url';
