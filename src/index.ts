@@ -28,7 +28,7 @@ const processVideo = async (url: string, time1: string, time2: string) =>{
   const duration: number = calculateDuration(time1, time2)
   const videoPath = path.join(__dirname, 'assets', 'videos')
   const publicPath = path.join(__dirname, 'public')
-
+  
   if(!fs.existsSync(videoPath)) fs.mkdirSync(videoPath, { recursive: true })
   if(!fs.existsSync(publicPath)) fs.mkdirSync(publicPath, { recursive: true })
 
