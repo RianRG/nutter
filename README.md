@@ -1,4 +1,11 @@
 # Nutter
+
+
+
+https://github.com/user-attachments/assets/7ba3eb52-d3d0-4b34-ba70-a0c434796a91
+
+
+
 A simple script made in typescript using nodejs to cut the part you want of a youtube video
 
 
